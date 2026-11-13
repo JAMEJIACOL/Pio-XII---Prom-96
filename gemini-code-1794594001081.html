@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Muro de Recuerdos PROM 96</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0c0d14;
+      --card: #151722;
+      --card-border: #232638;
+      --accent: #10b981;
+      --accent-glow: rgba(16, 185, 129, 0.25);
+      --purple: #8b5cf6;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      padding: 30px 16px 80px;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 25px; }
+    .badge {
+      display: inline-block;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: var(--accent);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+    }
+
+    .tabs {
+      display: flex;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 6px;
+      margin-bottom: 25px;
+      gap: 6px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--accent);
+      color: #042f2e;
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+
+    .glass-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: #fff;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      background: #0f1017;
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus, textarea:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 80px; }
+
+    .dropzone {
+      border: 2px dashed var(--card-border);
+      background: #0f1017;
+      border-radius: 16px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .dropzone:hover { border-color: var(--purple); }
+    .btn-select {
+      background: #1f2233;
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 12px;
+      display: inline-block;
+    }
+
+    .photo-grid-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .photo-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+    }
+    .photo-item img { width: 100%; height: 100%; object-fit: cover; }
+    .btn-del {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(239, 68, 68, 0.9);
+      color: #fff;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .search-results {
+      max-height: 250px;
+      overflow-y: auto;
+      margin-top: 10px;
+      background: #0f1017;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      display: none;
+    }
+    .track-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--card-border);
+      gap: 12px;
+    }
+    .track-row:last-child { border-bottom: none; }
+    .track-row img { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; }
+    .track-info { flex: 1; overflow: hidden; }
+    .track-title { font-weight: 600; font-size: 14px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .track-artist { font-size: 12px; color: var(--muted); }
+    .btn-play-mini {
+      background: #1f2233;
+      border: none;
+      color: var(--accent);
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .btn-add-track {
+      background: var(--accent);
+      color: #042f2e;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .selected-songs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .selected-song-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #0f1017;
+      border: 1px solid var(--card-border);
+      padding: 8px 12px;
+      border-radius: 12px;
+    }
+    .selected-song-pill img { width: 36px; height: 36px; border-radius: 6px; }
+
+    .btn-submit-main {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+      color: #042f2e;
+      font-size: 16px;
+      font-weight: 800;
+      padding: 16px;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      box-shadow: 0 8px 25px var(--accent-glow);
+    }
+
+    /* Muro Colectivo */
+    .muro-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .btn-refresh {
+      background: #1f2233;
+      border: 1px solid var(--card-border);
+      color: var(--accent);
+      padding: 8px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .post-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .post-author {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .author-name { font-size: 17px; font-weight: 800; color: #fff; }
+    .post-date { font-size: 12px; color: var(--muted); }
+    .post-message { font-size: 15px; color: #cbd5e1; line-height: 1.6; margin-bottom: 14px; }
+    .post-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .post-photo {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+    }
+    .post-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .post-songs-box {
+      background: #0f1017;
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .post-songs-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="badge">Colegio Pío XII • 30 Años</div>
+    <h1>Muro de Recuerdos PROM 96</h1>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('subir', this)">📸 Subir Mi Recuerdo</button>
+    <button class="tab-btn" onclick="switchTab('muro', this)">🌟 Muro Colectivo en Vivo</button>
+  </div>
+
+  <!-- VISTA 1: FORMULARIO -->
+  <div id="view-subir" class="view-section active">
+    <div class="glass-card">
+      <div class="card-title">1. Tu Nombre y Mensaje</div>
+      <input type="text" id="input-nombre" placeholder="Nombre completo" style="margin-bottom: 12px;">
+      <textarea id="input-mensaje" placeholder="Dedicatoria o anécdota para la promoción..."></textarea>
+    </div>
+
+    <div class="glass-card">
+      <div class="card-title">2. Fotos para Impresión y Álbum</div>
+      <div class="dropzone" onclick="document.getElementById('file-input').click()">
+        <span style="font-size: 32px;">📷</span>
+        <p style="color: var(--muted); margin-top: 6px;">Toca aquí para seleccionar fotos desde tu dispositivo</p>
+        <span class="btn-select">Elegir Archivos</span>
+      </div>
+      <input type="file" id="file-input" multiple accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+      <div id="photos-preview" class="photo-grid-preview"></div>
+    </div>
+
+    <div class="glass-card">
+      <div class="card-title">3. Canciones de la Época</div>
+      <input type="text" id="music-search" placeholder="Escribe el nombre de una canción o artista..." oninput="buscarMusica(this.value)">
+      <div id="search-results" class="search-results"></div>
+      <div id="selected-songs" class="selected-songs-list"></div>
+    </div>
+
+    <button id="btn-submit" class="btn-submit-main" onclick="enviarRecuerdo()">🚀 Publicar en el Muro</button>
+  </div>
+
+  <!-- VISTA 2: MURO -->
+  <div id="view-muro" class="view-section">
+    <div class="muro-header">
+      <div style="font-weight: 700; font-size: 18px;">Publicaciones de los Compañeros</div>
+      <button class="btn-refresh" onclick="recargarMuro()">🔄 Actualizar</button>
+    </div>
+    <div id="muro-loader" style="text-align: center; padding: 40px; color: var(--muted);">Cargando recuerdos...</div>
+    <div id="muro-container"></div>
+  </div>
+</div>
+
+<audio id="audio-player"></audio>
+
+<script>
+  // PEGA AQUÍ LA URL DE TU WEBHOOK DE GOOGLE
+  const WEBHOOK_URL = "URL_DE_TU_WEBHOOK_AQUI";
+
+  let fotosSeleccionadas = [];
+  let cancionesSeleccionadas = [];
+  let currentAudioUrl = null;
+  const audioPlayer = document.getElementById('audio-player');
+
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    
+    if (tab === 'subir') {
+      document.getElementById('view-subir').classList.add('active');
+    } else {
+      document.getElementById('view-muro').classList.add('active');
+      recargarMuro();
+    }
+  }
+
+  function handleFileSelect(e) {
+    Array.from(e.target.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        fotosSeleccionadas.push({ name: file.name, mimeType: file.type || 'image/jpeg', base64: ev.target.result });
+        renderPreview();
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  }
+
+  function renderPreview() {
+    const cont = document.getElementById('photos-preview');
+    cont.innerHTML = fotosSeleccionadas.map((f, i) => `
+      <div class="photo-item">
+        <img src="${f.base64}">
+        <button class="btn-del" onclick="removerFoto(${i})">&times;</button>
+      </div>
+    `).join('');
+  }
+
+  function removerFoto(i) {
+    fotosSeleccionadas.splice(i, 1);
+    renderPreview();
+  }
+
+  let timerMusica = null;
+  function buscarMusica(val) {
+    clearTimeout(timerMusica);
+    const box = document.getElementById('search-results');
+    if (val.trim().length < 2) { box.style.display = 'none'; return; }
+
+    timerMusica = setTimeout(() => {
+      fetch('https://itunes.apple.com/search?term=' + encodeURIComponent(val) + '&entity=song&limit=5')
+        .then(r => r.json())
+        .then(data => {
+          box.innerHTML = '';
+          if (!data.results || data.results.length === 0) {
+            box.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--muted);">Sin resultados</div>';
+            box.style.display = 'block';
+            return;
+          }
+          data.results.forEach(t => {
+            const row = document.createElement('div');
+            row.className = 'track-row';
+            row.innerHTML = `
+              <img src="${t.artworkUrl60}">
+              <div class="track-info">
+                <div class="track-title">${t.trackName}</div>
+                <div class="track-artist">${t.artistName}</div>
+              </div>
+              <button class="btn-play-mini" onclick="playAudio('${t.previewUrl}', this)">▶</button>
+              <button class="btn-add-track" onclick="agregarTrack('${t.trackName.replace(/'/g, "\\'")}', '${t.artistName.replace(/'/g, "\\'")}', '${t.artworkUrl100}', '${t.previewUrl}')">+ Añadir</button>
+            `;
+            box.appendChild(row);
+          });
+          box.style.display = 'block';
+        });
+    }, 250);
+  }
+
+  function playAudio(url, btn) {
+    if (currentAudioUrl === url && !audioPlayer.paused) {
+      audioPlayer.pause();
+      btn.innerText = '▶';
+    } else {
+      audioPlayer.src = url;
+      audioPlayer.play();
+      currentAudioUrl = url;
+      document.querySelectorAll('.btn-play-mini').forEach(b => b.innerText = '▶');
+      btn.innerText = '⏸';
+    }
+  }
+
+  function agregarTrack(name, artist, albumArt, previewUrl) {
+    cancionesSeleccionadas.push({ name, artist, albumArt, previewUrl });
+    renderTracks();
+    document.getElementById('music-search').value = '';
+    document.getElementById('search-results').style.display = 'none';
+  }
+
+  function renderTracks() {
+    const cont = document.getElementById('selected-songs');
+    cont.innerHTML = cancionesSeleccionadas.map((c, i) => `
+      <div class="selected-song-pill">
+        <img src="${c.albumArt}">
+        <div style="flex: 1; overflow: hidden;">
+          <div style="font-weight: 600; font-size: 13px; color: #fff;">${c.name}</div>
+          <div style="font-size: 11px; color: var(--muted);">${c.artist}</div>
+        </div>
+        <button class="btn-play-mini" onclick="playAudio('${c.previewUrl}', this)">▶</button>
+        <button class="btn-del" style="position: static;" onclick="cancionesSeleccionadas.splice(${i},1); renderTracks();">&times;</button>
+      </div>
+    `).join('');
+  }
+
+  // ENVÍO AL WEBHOOK DE GOOGLE
+  function enviarRecuerdo() {
+    const nombre = document.getElementById('input-nombre').value.trim();
+    const mensaje = document.getElementById('input-mensaje').value.trim();
+    if (!nombre) { alert('Ingresa tu nombre.'); return; }
+    if (fotosSeleccionadas.length === 0 && cancionesSeleccionadas.length === 0 && !mensaje) {
+      alert('Ingresa al menos una foto, canción o mensaje.'); return;
+    }
+
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true;
+    btn.innerText = 'Subiendo a Drive y guardando...';
+
+    const payload = { nombre, mensaje, fotos: fotosSeleccionadas, canciones: cancionesSeleccionadas };
+
+    fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(res => {
+      btn.disabled = false;
+      btn.innerText = '🚀 Publicar en el Muro';
+      if (res.exito) {
+        alert('¡Recuerdo publicado con éxito en el Muro!');
+        document.getElementById('input-mensaje').value = '';
+        fotosSeleccionadas = [];
+        cancionesSeleccionadas = [];
+        renderPreview();
+        renderTracks();
+        document.querySelectorAll('.tab-btn')[1].click();
+      } else {
+        alert('Error: ' + res.error);
+      }
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.innerText = '🚀 Publicar en el Muro';
+      alert('Error de conexión con el webhook.');
+    });
+  }
+
+  // CARGA DEL MURO EN VIVO
+  function recargarMuro() {
+    const loader = document.getElementById('muro-loader');
+    const cont = document.getElementById('muro-container');
+    loader.style.display = 'block';
+    cont.innerHTML = '';
+
+    fetch(WEBHOOK_URL)
+      .then(r => r.json())
+      .then(posts => {
+        loader.style.display = 'none';
+        if (!posts || posts.length === 0) {
+          cont.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 30px;">Aún no hay publicaciones.</div>';
+          return;
+        }
+
+        cont.innerHTML = posts.map(p => {
+          const fotosHtml = p.fotos && p.fotos.length > 0 ? `
+            <div class="post-gallery">
+              ${p.fotos.map(f => `<div class="post-photo"><img src="${f.urlThumb}" loading="lazy"></div>`).join('')}
+            </div>` : '';
+
+          const cancionesHtml = p.canciones && p.canciones.length > 0 ? `
+            <div class="post-songs-box">
+              <div class="post-songs-title">🎵 Canciones</div>
+              ${p.canciones.map(c => `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                  <img src="${c.albumArt}" style="width: 30px; height: 30px; border-radius: 6px;">
+                  <div style="flex: 1; font-size: 13px;"><strong>${c.name}</strong> • ${c.artist}</div>
+                  <button class="btn-play-mini" onclick="playAudio('${c.previewUrl}', this)">▶</button>
+                </div>
+              `).join('')}
+            </div>` : '';
+
+          return `
+            <div class="post-card">
+              <div class="post-author">
+                <div class="author-name">👤 ${p.nombre}</div>
+                <div class="post-date">${p.fecha}</div>
+              </div>
+              ${p.mensaje ? `<div class="post-message">"${p.mensaje}"</div>` : ''}
+              ${fotosHtml}
+              ${cancionesHtml}
+            </div>
+          `;
+        }).join('');
+      })
+      .catch(() => {
+        loader.innerText = 'No se pudo cargar el muro. Verifica la URL del webhook.';
+      });
+  }
+</script>
+
+</body>
+</html>
