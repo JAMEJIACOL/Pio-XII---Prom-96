@@ -481,7 +481,10 @@
 
     fetch(WEBHOOK_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
       body: JSON.stringify(payload)
     })
     .then(r => r.json())
@@ -501,9 +504,10 @@
       }
     })
     .catch(err => {
+      console.error("Detalle del error:", err);
       btn.disabled = false;
       btn.innerText = '🚀 Publicar en el Muro';
-      alert('Error de conexión con el webhook.');
+      alert('Error de conexión con el webhook. Revisa que el Webhook tenga acceso para "Cualquier usuario".');
     });
   }
 
